@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ==========================================
+   CLASSES GLOBAIS DO CORTCUT
+========================================== */
+
+.menu-item {
+  @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors cursor-pointer;
+}
+
+.menu-item-active {
+  @apply flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-blue-600/10 border-l-4 border-blue-600 rounded-lg transition-colors cursor-pointer;
+}
