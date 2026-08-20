@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 // ... (mantenha o restante das suas importações logo abaixo)
 
 
@@ -20,6 +20,8 @@ import { useSearchParams } from 'next/navigation';
 import { moderarConteudo } from "@/lib/utils/contentModerator";
 
 import ProgressoAnalise from "./components/ProgressoAnalise";
+
+
 
 
 
@@ -311,23 +313,21 @@ setStatusAnalise("analisando");
   const alertaQuaseLimite = !isPro && totalProdutos === 9;
 
   return (
+    <Suspense fallback={<div className="p-10 text-center text-zinc-400">Carregando painel...</div>}>
+      <>
+        <div className="max-w-6xl mx-auto pb-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-bold text-white tracking-tight">Publicar Oferta na Vitrine</h2>
+            <p className="text-xs text-zinc-400">
+              Cadastre sua oferta com gatilho de preço e prévia em tempo real de forma rápida e organizada.
+            </p>
+          </div>
 
-    
-    <>
-      <div className="max-w-6xl mx-auto pb-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-bold text-white tracking-tight">Publicar Oferta na Vitrine</h2>
-          <p className="text-xs text-zinc-400">
-            Cadastre sua oferta com gatilho de preço e prévia em tempo real de forma rápida e organizada.
-          </p>
-        </div>
-
-        {searchParams.get('status') === 'sucesso' && (
-  <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-400 text-xs font-medium text-center mb-4">
-    🎉 Pagamento realizado com sucesso! Sua conta Pro está sendo ativada.
-  </div>
-)}
-
+          {searchParams.get('status') === 'sucesso' && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-400 text-xs font-medium text-center mb-4">
+              🎉 Pagamento realizado com sucesso! Sua conta Pro está sendo ativada.
+            </div>
+          )}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* CAMADA DO PORTEIRO: Verifica se carregou os dados antes de exibir */}
@@ -424,13 +424,14 @@ setStatusAnalise("analisando");
       </div>
 
       {showPricingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-4xl bg-transparent mt-10">
-            <button onClick={() => setShowPricingModal(false)} className="absolute -top-10 right-0 text-zinc-400 bg-zinc-900/50 px-4 py-1 rounded-full border border-zinc-700 cursor-pointer">Voltar</button>
-            <PricingCard />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+            <div className="relative w-full max-w-4xl bg-transparent mt-10">
+              <button onClick={() => setShowPricingModal(false)} className="absolute -top-10 right-0 text-zinc-400 bg-zinc-900/50 px-4 py-1 rounded-full border border-zinc-700 cursor-pointer">Voltar</button>
+              <PricingCard />
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </>
+    </Suspense>
   );
 }
