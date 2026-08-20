@@ -1,4 +1,5 @@
 // src/lib/firebase.js
+
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { 
@@ -26,9 +27,11 @@ export {
   createUserWithEmailAndPassword, 
   sendPasswordResetEmail,
   doc,
+  getDoc,    // <--- ADICIONE ESTA LINHA AQUI
   setDoc,
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  
 };

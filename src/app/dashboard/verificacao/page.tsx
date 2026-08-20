@@ -20,6 +20,11 @@ export default function VerificacaoPage() {
   const [mensagem, setMensagem] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
   const [userUid, setUserUid] = useState<string | null>(null);
 
+  // --- CÓDIGO NOVO: Estados para mostrar as imagens de ajuda ---
+  const [mostrarAjudaDescricao, setMostrarAjudaDescricao] = useState(false);
+  const [mostrarAjudaLink, setMostrarAjudaLink] = useState(false);
+  // --- FIM DO CÓDIGO NOVO ---
+
   // Função para gerar um código aleatório novo
   const gerarNovoCodigo = () => {
     const novoCodigo = "CORTCUT-" + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -187,11 +192,29 @@ export default function VerificacaoPage() {
                 <div className="w-8 h-8 rounded-full bg-blue-600/20 text-blue-500 flex items-center justify-center font-black shrink-0 border border-blue-500/30">
                   2
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white mb-1">Cole na descrição de um vídeo</h3>
+                <div className="w-full">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-bold text-white">Cole na descrição de um vídeo</h3>
+                    {/* BOTÃO DE AJUDA CIRÚRGICO */}
+                    <button 
+                      onClick={() => setMostrarAjudaDescricao(!mostrarAjudaDescricao)}
+                      className="w-5 h-5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                      title="Como fazer isso?"
+                    >
+                      ?
+                    </button>
+                  </div>
                   <p className="text-xs text-zinc-400">
                     Vá até o seu canal do YouTube, escolha um vídeo seu (pode ser Público ou Não Listado) e cole o código acima na descrição do vídeo e salve.
                   </p>
+
+                  {/* CAIXA DE IMAGEM DA DESCRIÇÃO */}
+                  {mostrarAjudaDescricao && (
+                    <div className="mt-3 p-3 bg-zinc-900 border border-zinc-700 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
+                      <p className="text-[11px] text-zinc-300 font-medium mb-2">Exemplo de como deve ficar na edição do YouTube:</p>
+                      <img src="/etpa-1.png" alt="Exemplo de descrição" className="w-full rounded border border-zinc-700 opacity-90" />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -201,8 +224,26 @@ export default function VerificacaoPage() {
                   3
                 </div>
                 <div className="w-full">
-                  <h3 className="text-sm font-bold text-white mb-1">Informe o link do vídeo e verifique</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-bold text-white">Informe o link do vídeo e verifique</h3>
+                    {/* BOTÃO DE AJUDA CIRÚRGICO */}
+                    <button 
+                      onClick={() => setMostrarAjudaLink(!mostrarAjudaLink)}
+                      className="w-5 h-5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                      title="Onde copio o link?"
+                    >
+                      ?
+                    </button>
+                  </div>
                   <p className="text-xs text-zinc-400 mb-3">Cole abaixo a URL do vídeo onde você colocou o código.</p>
+
+                  {/* CAIXA DE IMAGEM DO LINK */}
+                  {mostrarAjudaLink && (
+                    <div className="mb-3 p-3 bg-zinc-900 border border-zinc-700 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
+                      <p className="text-[11px] text-zinc-300 font-medium mb-2">Copie o link do vídeo como mostrado no exemplo:</p>
+                      <img src="/etapa-2.png" alt="Exemplo de link" className="w-full rounded border border-zinc-700 opacity-90" />
+                    </div>
+                  )}
                   
                   <input
                     type="text"

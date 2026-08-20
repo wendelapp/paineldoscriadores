@@ -1,79 +1,109 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 
-interface Produto {
+export interface Produto {
+  pixelMeta: import("react").JSX.Element;
+  pixelGoogle: import("react").JSX.Element;
   id: string;
   titulo: string;
   precoPor: string;
   precoDe: string;
   urlAfiliado: string;
   urlImagem: string;
-  ativo: boolean;
+  ativo?: boolean;
+  visualizacoes?: number; // 👈 NOVO
+  cliques?: number;       // 👈 NOVO
+  dataPublicacao?: any;   // 👈 NOVO
+  createdAt?: string;     // 👈 NOVO
+  status?: "analise" | "ativo" | "reprovado"; // 👈 ADICIONE ESTA LINHA AQUI
 }
 
 interface VisaoGeralContentProps {
-  produtos: Produto[];
-  carregando: boolean;
+  produtos?: Produto[];
+  carregando?: boolean;
 }
 
-// 📦 DADOS FAKE PARA TESTE DE VISUALIZAÇÃO
-const PRODUTOS_FAKE: Produto[] = [
-  {
-    id: "1",
-    titulo: "Kit Cápsulas Detox Turbo - 5 Meses",
-    precoDe: "147,90",
-    precoPor: "79,90",
-    urlImagem: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop",
-    urlAfiliado: "#",
-    ativo: true
-  },
-  {
-    id: "2",
-    titulo: "Fone Bluetooth Gamer Pro Sem Fio",
-    precoDe: "119,90",
-    precoPor: "49,90",
-    urlImagem: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&h=200&fit=crop",
-    urlAfiliado: "#",
-    ativo: true
-  },
-  {
-    id: "3",
-    titulo: "Sérum Facial Anti-Idade Vitamina C",
-    precoDe: "89,90",
-    precoPor: "39,90",
-    urlImagem: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop",
-    urlAfiliado: "#",
-    ativo: true
-  },
-  {
-    id: "4",
-    titulo: "Smartwatch Esportivo 2026",
-    precoDe: "299,90",
-    precoPor: "149,90",
-    urlImagem: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=200&h=200&fit=crop",
-    urlAfiliado: "#",
-    ativo: true
-  },
-  {
-    id: "5",
-    titulo: "Microfone Lapela Sem Fio para Celular",
-    precoDe: "99,90",
-    precoPor: "59,90",
-    urlImagem: "https://images.unsplash.com/photo-1516280440544-3075c3f81e35?w=200&h=200&fit=crop",
-    urlAfiliado: "#",
-    ativo: true
-  }
-];
+export default function VisaoGeralContent({}: VisaoGeralContentProps) {
+  const router = useRouter();
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [isVerified, setIsVerified] = useState(false); // Trava de segurança para verificação
 
-export default function VisaoGeralContent({ produtos, carregando }: VisaoGeralContentProps) {
-  // Truque: Se não vier produto real, usa os Fakes para o visual funcionar!
-  const produtosExibicao = produtos.length > 0 ? produtos : PRODUTOS_FAKE;
-  
-  const totalProdutos = produtosExibicao.length;
-  
+  // 👇 ADICIONE ESTAS VARIÁVEIS DE SOMA AQUI
+  const totalVisualizacoes = produtos.reduce((acc, p) => acc + (p.visualizacoes || 0), 0);
+  const totalCliques = produtos.reduce((acc, p) => acc + (p.cliques || 0), 0);
+
+  // Motor de busca direto no Firebase (Produtos + Status de Verificação)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // 1. Busca os dados do usuário para checar se está verificado
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            setIsVerified(userDocSnap.data().isVerified === true);
+          }
+
+          // 2. Busca os produtos do usuário
+          const produtosRef = collection(db, "users", user.uid, "produtos");
+          const querySnapshot = await getDocs(produtosRef);
+          
+          const listaProdutos = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Produto[];
+          
+          // Inverte a lista para mostrar os recém-adicionados primeiro
+          // 👇 NOVA ORDENAÇÃO CRONOLÓGICA
+          listaProdutos.sort((a, b) => {
+            const tempoA = a.dataPublicacao?.seconds || 0;
+            const tempoB = b.dataPublicacao?.seconds || 0;
+            return tempoB - tempoA;
+          });
+          setProdutos(listaProdutos);
+        } catch (error) {
+          console.error("Erro ao buscar dados:", error);
+        } finally {
+          setCarregando(false);
+        }
+      } else {
+        setProdutos([]);
+        setIsVerified(false);
+        setCarregando(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Função de segurança do botão de publicar
+  const handlePublicarClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isVerified) {
+      alert("⚠️ Você precisa verificar sua conta com o YouTube antes de publicar ofertas.");
+      router.push("/dashboard/verificacao");
+    } else {
+      router.push("/dashboard/publicar");
+    }
+  };
+
+  const totalProdutos = produtos.length;
+  // 👇 FUNÇÃO DE FORMATAR DATA
+  const formatarData = (data: any) => {
+    if (!data) return "Recente";
+    if (data.seconds) return new Date(data.seconds * 1000).toLocaleDateString('pt-BR');
+    if (typeof data === 'string') return data.split('às')[0].trim(); 
+    return "Recente";
+  };
   // Lógica para pegar exatamente os 4 produtos mais recentes
-  const ultimosProdutos = produtosExibicao.slice(0, 4);
+  const ultimosProdutos = produtos.slice(0, 4);
 
   return (
     <div className="max-w-6xl mx-auto pb-6 space-y-6">
@@ -86,12 +116,14 @@ export default function VisaoGeralContent({ produtos, carregando }: VisaoGeralCo
             Acompanhe as métricas da sua vitrine e o status das suas últimas ofertas.
           </p>
         </div>
-        <Link
-          href="/dashboard/publicar"
+        
+        {/* BOTÃO COM TRAVA DE SEGURANÇA */}
+        <button
+          onClick={handlePublicarClick}
           className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-lg transition-colors shadow-lg cursor-pointer"
         >
           ✨ Publicar Nova Oferta
-        </Link>
+        </button>
       </div>
 
       {/* Cards de Métricas Compactos */}
@@ -104,14 +136,14 @@ export default function VisaoGeralContent({ produtos, carregando }: VisaoGeralCo
 
         <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-4 shadow-xl">
           <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Visualizações Totais</p>
-          <p className="text-2xl font-black text-white mt-1">1.240</p>
-          <p className="text-[10px] text-blue-400 mt-1 font-medium">+12% esta semana</p>
+          <p className="text-2xl font-black text-white mt-1">{totalVisualizacoes}</p>
+          <p className="text-[10px] text-blue-400 mt-1 font-medium">0 nesta semana</p>
         </div>
 
         <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-4 shadow-xl">
           <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Cliques em Links (CTR)</p>
-          <p className="text-2xl font-black text-white mt-1">348</p>
-          <p className="text-[10px] text-purple-400 mt-1 font-medium">28% taxa de conversão</p>
+          <p className="text-2xl font-black text-white mt-1">{totalCliques}</p>
+          <p className="text-[10px] text-purple-400 mt-1 font-medium">0% taxa de conversão</p>
         </div>
       </div>
 
@@ -123,29 +155,123 @@ export default function VisaoGeralContent({ produtos, carregando }: VisaoGeralCo
         </div>
 
         {carregando ? (
-          <div className="py-8 text-center text-xs text-zinc-500">Carregando dados da vitrine...</div>
+          <div className="py-8 text-center text-xs text-zinc-500 animate-pulse">Carregando dados da vitrine...</div>
         ) : (
           <div className="space-y-2">
-            {ultimosProdutos.map((prod) => (
-              <div key={prod.id} className="flex items-center justify-between p-3 bg-zinc-900/60 border border-zinc-800/60 rounded-lg hover:border-zinc-700 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
-                    {prod.urlImagem ? (
-                      <img src={prod.urlImagem} alt={prod.titulo} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xs">📦</span>
+            {ultimosProdutos.length === 0 ? (
+               <div className="py-6 text-center text-xs text-zinc-500">
+                 Nenhuma oferta cadastrada. Clique em "Publicar Nova Oferta" para começar.
+               </div>
+            ) : (
+             ultimosProdutos.map((prod) => (
+                <div key={prod.id} className="flex items-center justify-between p-3 bg-zinc-900/60 border border-zinc-800/60 rounded-lg hover:border-zinc-700 transition-colors">
+                  
+                  {/* LADO ESQUERDO: Imagem e Título */}
+                  <div className="flex items-center gap-3 w-1/3">
+                    <div className="w-10 h-10 rounded-lg bg-zinc-800 overflow-hidden shrink-0 flex items-center justify-center border border-zinc-700">
+                      {prod.urlImagem ? (
+                        <img src={prod.urlImagem} alt={prod.titulo} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xs">📦</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold text-white line-clamp-1">{prod.titulo}</h4>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">Por: R$ {prod.precoPor} <span className="line-through ml-1 text-zinc-600">R$ {prod.precoDe}</span></p>
+                    </div>
+                  </div>
+
+                  {/* MEIO: Data, Visualizações e Cliques (Responsivo para Celular e PC) */}
+                  <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+                    {/* Visualizações */}
+                    <span className="flex items-center gap-1 text-[10px] sm:text-[11px] text-zinc-400" title="Visualizações">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      {prod.visualizacoes || 0}
+                    </span>
+                    
+                    {/* Cliques */}
+                    <span className="flex items-center gap-1 text-[10px] sm:text-[11px] text-zinc-400" title="Cliques">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+                        <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+                      </svg>
+                      {prod.cliques || 0}
+                    </span>
+
+                    {/* Data */}
+                    <span className="hidden sm:inline text-[10px] text-zinc-500 font-medium border-l border-zinc-800 pl-4">
+                      {formatarData(prod.dataPublicacao || prod.createdAt)}
+                    </span>
+                  </div>
+
+                 {/* LADO DIREITO: Badges de Rastreio + Ativo */}
+                  <div className="flex justify-end items-center gap-2 w-1/3">
+                    
+                    {/* BADGE DA META (FACEBOOK) */}
+                    {prod.pixelMeta && (
+                      <span 
+                        className="hidden sm:flex px-2 py-1 bg-blue-600/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded items-center gap-1" 
+                        title="Pixel da Meta Ativo"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96C18.34 21.21 22 17.06 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/>
+                        </svg>
+                        Meta
+                      </span>
                     )}
+
+                    {/* BADGE DO GOOGLE ADS */}
+                    {prod.pixelGoogle && (
+                      <span 
+                        className="hidden sm:flex px-2 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider rounded items-center gap-1" 
+                        title="Pixel do Google Ativo"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/>
+                        </svg>
+                        Ads
+                      </span>
+                    )}
+
+                    {/* BADGE DINÂMICO DE STATUS */}
+                    {prod.status === "analise" ? (
+                      <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[10px] font-bold rounded uppercase tracking-wider whitespace-nowrap" title="Aguardando liberação">
+                        ⏳ Em Análise
+                      </span>
+                    ) : prod.status === "reprovado" ? (
+                      <span className="px-2 py-1 bg-rose-500/10 text-rose-500 text-[10px] font-bold rounded uppercase tracking-wider whitespace-nowrap" title="Bloqueado por violação">
+                        ⚠️ Reprovado
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded uppercase tracking-wider whitespace-nowrap">
+                        
+                      </span>
+                    )}
+
+                    {/* BADGE DO GOOGLE ADS */}
+                    {prod.pixelGoogle && (
+                      <span 
+                        className="hidden sm:flex px-2 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider rounded items-center gap-1" 
+                        title="Pixel do Google Ativo"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/>
+                        </svg>
+                        Ads
+                      </span>
+                    )}
+
+                    {/* BADGE ORIGINAL ATIVO */}
+                    <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded uppercase tracking-wider">
+                      Ativo
+                    </span>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white line-clamp-1">{prod.titulo}</h4>
-                    <p className="text-[10px] text-zinc-500">Por: R$ {prod.precoPor} <span className="line-through ml-1 text-zinc-600">R$ {prod.precoDe}</span></p>
-                  </div>
+                  
                 </div>
-                <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded uppercase tracking-wider">
-                  Ativo
-                </span>
-              </div>
-            ))}
+              ))
+            )}
             
             {/* Link para ver todos se houver mais de 4 produtos */}
             {totalProdutos > 4 && (

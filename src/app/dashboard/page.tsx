@@ -5,17 +5,7 @@ import { useState, useEffect } from "react";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import VisaoGeralContent from "./components/VisaoGeralContent";
-
-interface Produto {
-  id: string;
-  titulo: string;
-  precoPor: string;
-  precoDe: string;
-  urlAfiliado: string;
-  urlImagem: string;
-  ativo: boolean;
-}
+import VisaoGeralContent, { Produto } from "./components/VisaoGeralContent";
 
 export default function DashboardPage() {
   const [produtos, setProdutos] = useState<Produto[]>([]);

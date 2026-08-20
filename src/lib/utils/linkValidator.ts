@@ -1,16 +1,28 @@
 // src/lib/utils/linkValidator.ts
 
-const PLATAFORMAS_PERMITIDAS = [
+export const PLATAFORMAS_PERMITIDAS = [
+  // Grandes Marketplaces de Produtos Físicos
   "mercadolivre.com",
-  "shopee", 
-  "amazon",
+  "mercadolivre.com.br",
+  "shopee.com",
+  "shopee.com.br",
+  "amazon.com",
+  "amazon.com.br",
+  "magazineluiza.com.br",
+
+  // Principais Plataformas de Infoprodutos e Afiliados
   "hotmart.com",
   "eduzz.com",
-  "monetizze.com",
-  "kiwify.com",
-  "magazineluiza.com",
-  "tiktok.com",     // Adicionado para aceitar links de vídeos do TikTok
-  "instagram.com"   // Adicionado para aceitar vídeos do Insta
+  "monetizze.com.br",
+  "kiwify.com.br",
+
+  // Plataformas Especializadas em Produtos Físicos / Encapsulados
+  "doppus.com",
+  "braip.com",
+
+  // Redes Sociais e Mídias para Direcionamento
+  "tiktok.com",
+  "instagram.com",
 ];
 
 const PALAVRAS_PROIBIDAS = [

@@ -1,12 +1,16 @@
-// src/modules/auth/components/RegisterForm.tsx
 "use client";
 
 import { useState } from "react";
-// Olha os comandos novos do banco de dados (db, doc, setDoc) sendo importados aqui:
 import { auth, db, createUserWithEmailAndPassword, doc, setDoc, collection, query, where, getDocs } from "../../../lib/firebase";
-import TermsModal from "./TermsModal";
+import TermsModal, { LegalType } from "./TermsModal"; 
 
-export default function RegisterForm({ onRegisterSuccess }: { onRegisterSuccess: () => void }) {
+// O SEGREDO ESTÁ AQUI: Avisar ao TypeScript que o onOpenLegal existe!
+interface RegisterFormProps {
+  onRegisterSuccess: () => void;
+  onOpenLegal?: (type: LegalType) => void;
+}
+
+export default function RegisterForm({ onRegisterSuccess, onOpenLegal }: RegisterFormProps) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [email, setEmail] = useState("");
@@ -128,9 +132,10 @@ export default function RegisterForm({ onRegisterSuccess }: { onRegisterSuccess:
                 {showPassword ? "Ocultar" : "Mostrar"}
               </button>
             </div>
-            {password.length > 0 && !isPasswordValid && (
-              <p className="text-xs text-rose-400 mt-1">A senha deve ter no mínimo 6 caracteres contendo letras e números.</p>
-            )}
+            {/* Texto discreto e dinâmico */}
+            <p className={`text-[11px] mt-1.5 transition-colors ${password.length === 0 ? "text-zinc-500" : isPasswordValid ? "text-emerald-400" : "text-rose-400"}`}>
+              {password.length > 0 && isPasswordValid ? "✓ Senha forte e segura" : "Mínimo de 6 caracteres, contendo letras e números."}
+            </p>
           </div>
 
           <div className="flex items-start mt-4">
@@ -150,7 +155,7 @@ export default function RegisterForm({ onRegisterSuccess }: { onRegisterSuccess:
         </form>
       </div>
 
-      <TermsModal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} />
+      <TermsModal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} type={"termos"} />
     </>
   );
 }

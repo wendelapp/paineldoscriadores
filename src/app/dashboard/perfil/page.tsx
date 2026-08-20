@@ -1,4 +1,3 @@
-// src/app/dashboard/perfil/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,18 +6,9 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import PerfilContent from "./components/PerfilContent";
 
-// Dados de exemplo para aparecer rápido no teste
-const PERFIL_FAKE = {
-  nome: "Seu Nome Aqui",
-  usuario: "seunome",
-  bio: "Especialista em achar os melhores produtos com desconto!",
-  isVerified: false,
-};
-
 export default function PerfilPage() {
-  // Já inicia com os dados fake e carregamento falso para ser INSTANTÂNEO!
-  const [dadosPerfil, setDadosPerfil] = useState<any>(PERFIL_FAKE); 
-  const [carregando, setCarregando] = useState(false);
+  const [dadosPerfil, setDadosPerfil] = useState<any>(null);
+  const [carregando, setCarregando] = useState(true);
   const [userUid, setUserUid] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,16 +22,31 @@ export default function PerfilPage() {
           if (docSnap.exists()) {
             setDadosPerfil(docSnap.data());
           } else {
-            setDadosPerfil(PERFIL_FAKE); // Se não tiver no banco, usa o fake
+            // ...
+  setDadosPerfil({
+    nome: "",
+    usuario: "",
+    bio: "",
+    avatarUrl: "",
+    bannerUrl: "",
+    isVerified: false,
+    redesSociais: {
+      youtube: "",
+      instagram: "",
+      tiktok: "",
+      facebook: "",
+      twitter: "",
+      telegram: ""
+    }
+  });
+  // ...
           }
         } catch (error) {
           console.error("Erro ao buscar perfil:", error);
-          setDadosPerfil(PERFIL_FAKE);
         } finally {
           setCarregando(false);
         }
       } else {
-        setDadosPerfil(PERFIL_FAKE);
         setCarregando(false);
       }
     });
@@ -52,14 +57,13 @@ export default function PerfilPage() {
     if (userUid) {
       try {
         const docRef = doc(db, "users", userUid);
+        // Atualiza no Firebase Firestore
         await updateDoc(docRef, novosDados);
         setDadosPerfil({ ...dadosPerfil, ...novosDados });
       } catch (error) {
         console.error("Erro ao salvar:", error);
+        alert("Erro ao salvar perfil no banco de dados.");
       }
-    } else {
-      // Atualiza apenas localmente se for o perfil fake
-      setDadosPerfil({ ...dadosPerfil, ...novosDados });
     }
   };
 

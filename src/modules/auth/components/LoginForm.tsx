@@ -6,6 +6,10 @@ import { auth, signInWithEmailAndPassword } from "../../../lib/firebase";
 
 import { useRouter } from "next/navigation";
 
+import LegalModal from "./TermsModal"; // O modal dinâmico que criamos
+
+import { LegalType } from "./TermsModal"; // Importamos o tipo para garantir segurança
+
 interface LoginFormProps {
   onForgotPassword: () => void;
 }
@@ -17,6 +21,16 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Estados para controlar o Modal de termos/políticas
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeType, setActiveType] = useState<LegalType>('termos');
+
+  // Função que o AuthFooter vai chamar
+  const handleOpenLegal = (type: LegalType) => {
+    setActiveType(type);
+    setIsModalOpen(true);
+  };
 
   const getErrorMessage = (errorCode: string) => {
     switch (errorCode) {
@@ -131,6 +145,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           Esqueceu a senha?
         </button>
       </div>
+      
     </div>
   );
 }
