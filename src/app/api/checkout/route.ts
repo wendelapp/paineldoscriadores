@@ -21,7 +21,7 @@ export async function POST(request: Request) {
             id: 'cortcut-pro-teste',
             title: 'CortCut Pro - Teste de Produção (R$ 1,00)',
             quantity: 1,
-            unit_price: 1.00, // Valor simbólico de 1 real para o teste real
+            unit_price: 5.00, // Valor simbólico de 5 real para o teste real
             currency_id: 'BRL',
           },
         ],
