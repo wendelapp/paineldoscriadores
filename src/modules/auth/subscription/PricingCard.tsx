@@ -43,6 +43,16 @@ export default function PricingCard() {
     <>
       {/* Container com pt-16 no mobile para garantir que o título nunca fique cortado no topo */}
       <div className="w-full max-w-4xl mx-auto p-4 pt-16 md:pt-8 animate-in fade-in duration-300">
+        {/* --- ADICIONE ESTE BLOCO AQUI --- */}
+        <div className="flex justify-end mb-4 md:mb-0 md:-mt-4 relative z-10">
+          <button 
+            onClick={() => router.push("/dashboard")} 
+            className="text-zinc-400 hover:text-white text-xs md:text-sm flex items-center gap-2 cursor-pointer transition-colors bg-zinc-900/80 px-4 py-1.5 rounded-full border border-zinc-800 hover:bg-zinc-800"
+          >
+            ✕ Voltar
+          </button>
+        </div>
+        {/* ------------------------------- */}
         
         {/* Título responsivo */}
         <div className="text-center mb-8 space-y-2">
