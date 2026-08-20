@@ -1,9 +1,12 @@
-
 'use client';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 import { useState, useEffect } from "react";
+// ... (mantenha o restante das suas importações logo abaixo)
+
+
 import { auth, db } from "../../../lib/firebase";
 // 1. Cirurgia aqui: Adicionamos o getDocs para contar os produtos
 import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
