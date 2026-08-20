@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Desativa a verificação estática que está travando o build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
+    // Ignora qualquer erro de tipagem na hora de subir para a Vercel
     ignoreBuildErrors: true,
   },
-  // Força que as páginas não sejam estáticas durante o build
-  output: 'standalone', 
-}
+  eslint: {
+    // Ignora erros de linting da Vercel
+    ignoreDuringBuilds: true,
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
