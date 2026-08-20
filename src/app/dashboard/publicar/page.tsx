@@ -234,7 +234,7 @@ setStatusAnalise("analisando");
       setPixelMeta("");
       setPixelGoogle("");
 
-      localStorage.removeItem("@CortCut:rascunhoPublicar");
+      localStorage.removeItem("@criadordelink:rascunhoPublicar");
 
     } catch (error) {
       console.error("Erro ao salvar:", error);
@@ -245,9 +245,9 @@ setStatusAnalise("analisando");
   };
 
   // 1. CARREGAR RASCUNHO SALVO
-  useEffect(() => {
-    if (!editId) {
-      const rascunhoSalvo = localStorage.getItem("@CortCut:rascunhoPublicar");
+ useEffect(() => {
+    if (!editId && typeof window !== 'undefined') {
+      const rascunhoSalvo = localStorage.getItem("@criadordelink:rascunhoPublicar");
       if (rascunhoSalvo) {
         try {
           const dados = JSON.parse(rascunhoSalvo);
@@ -269,15 +269,13 @@ setStatusAnalise("analisando");
 
   // 2. SALVAR RASCUNHO AUTOMATICAMENTE
   useEffect(() => {
-    // Só salva se não estiver editando e se já tiver digitado pelo menos o título
-    if (!editId && titulo.length > 0) {
+    if (!editId && titulo.length > 0 && typeof window !== 'undefined') {
       const dadosRascunho = {
         titulo, urlAfiliado, urlVideo, urlImagem, precoDe, precoPor, textoBotao, pixelMeta, pixelGoogle
       };
-      localStorage.setItem("@CortCut:rascunhoPublicar", JSON.stringify(dadosRascunho));
+      localStorage.setItem("@criadordelink:rascunhoPublicar", JSON.stringify(dadosRascunho));
     }
   }, [titulo, urlAfiliado, urlVideo, urlImagem, precoDe, precoPor, textoBotao, pixelMeta, pixelGoogle, editId]);
-
   // Adicione esta função e o useEffect logo abaixo do seu editId:
   const carregarProdutoParaEdicao = async (id: string) => {
     if (!userUid) return;
