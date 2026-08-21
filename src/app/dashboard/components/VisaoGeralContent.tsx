@@ -35,9 +35,20 @@ export default function VisaoGeralContent({}: VisaoGeralContentProps) {
   const [carregando, setCarregando] = useState(true);
   const [isVerified, setIsVerified] = useState(false); // Trava de segurança para verificação
 
-  // 👇 ADICIONE ESTAS VARIÁVEIS DE SOMA AQUI
-  const totalVisualizacoes = produtos.reduce((acc, p) => acc + (p.visualizacoes || 0), 0);
-  const totalCliques = produtos.reduce((acc, p) => acc + (p.cliques || 0), 0);
+  // 👇 ESTADO DO FILTRO DE DIAS
+  const [diasFiltro, setDiasFiltro] = useState("7");
+
+  // 👇 FILTRAGEM POR DIAS E VARIÁVEIS DE SOMA ATUALIZADAS
+  const produtosFiltrados = produtos.filter((prod) => {
+    if (!prod.dataPublicacao?.seconds) return true;
+    const dataProd = new Date(prod.dataPublicacao.seconds * 1000);
+    const diffDias = (Date.now() - dataProd.getTime()) / (1000 * 3600 * 24);
+    return diffDias <= Number(diasFiltro);
+  });
+
+  const totalVisualizacoes = produtosFiltrados.reduce((acc, p) => acc + (p.visualizacoes || 0), 0);
+  const totalCliques = produtosFiltrados.reduce((acc, p) => acc + (p.cliques || 0), 0);
+  const ultimosProdutos = produtosFiltrados.slice(0, 4);
 
   // Motor de busca direto no Firebase (Produtos + Status de Verificação)
   useEffect(() => {
@@ -103,28 +114,30 @@ export default function VisaoGeralContent({}: VisaoGeralContentProps) {
     return "Recente";
   };
   // Lógica para pegar exatamente os 4 produtos mais recentes
-  const ultimosProdutos = produtos.slice(0, 4);
+  
 
   return (
     <div className="max-w-6xl mx-auto pb-6 space-y-6">
       
-      {/* Cabeçalho de Ações da Visão Geral */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold text-white tracking-tight">Resumo de Desempenho</h2>
-          <p className="text-xs text-zinc-400">
-            Acompanhe as métricas da sua vitrine e o status das suas últimas ofertas.
-          </p>
-        </div>
-        
-        {/* BOTÃO COM TRAVA DE SEGURANÇA */}
-        <button
-          onClick={handlePublicarClick}
-          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-lg transition-colors shadow-lg cursor-pointer"
-        >
-          ✨ Publicar Nova Oferta
-        </button>
-      </div>
+      {/* CABEÇALHO: Substitua o botão solto por esta div com o select do lado */}
+<div className="flex items-center gap-3">
+  <select
+    value={diasFiltro}
+    onChange={(e) => setDiasFiltro(e.target.value)}
+    className="bg-zinc-900 text-xs text-zinc-300 border border-zinc-700 rounded-lg px-3 py-2 outline-none focus:border-blue-500 cursor-pointer shadow-md"
+  >
+    <option value="7">Últimos 7 dias</option>
+    <option value="15">Últimos 15 dias</option>
+    <option value="30">Últimos 30 dias</option>
+  </select>
+
+  <button
+    onClick={handlePublicarClick}
+    className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-lg transition-colors shadow-lg cursor-pointer"
+  >
+    ✨ Publicar Nova Oferta
+  </button>
+</div>
 
       {/* Cards de Métricas Compactos */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

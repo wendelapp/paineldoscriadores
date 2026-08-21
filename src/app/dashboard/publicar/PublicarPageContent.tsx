@@ -84,20 +84,22 @@ export function PublicarProdutoPage() {
         for (const produtoDoc of snapshot.docs) {
           const dados = produtoDoc.data();
           
-          if (dados.status === "analise") {
-            const tempoCriacao = dados.dataCriacao?.toMillis?.() || Date.now();
-            const tempoAtual = Date.now();
-            const diferencaMinutos = (tempoAtual - tempoCriacao) / (1000 * 60);
+          // Dentro do useEffect da verificarFilaAnalise
+if (dados.status === "analise") {
+  const tempoCriacao = dados.dataCriacao?.toMillis?.() || Date.now();
+  const tempoAtual = Date.now();
+  const diferencaMinutos = (tempoAtual - tempoCriacao) / (1000 * 60);
 
-            if (diferencaMinutos >= 15) {
-              await updateDoc(doc(db, "users", userUid, "produtos", produtoDoc.id), { status: "ativo" });
-            } else {
-              setProdutoEmAnaliseId(produtoDoc.id);
-              setProdutoEmAnaliseDataCriacao(dados.dataCriacao);
-              setStatusAnalise("analisando"); // Força o estado correto
-              produtoEncontrado = true;
-            }
-          }
+  // Aumentamos a tolerância para 16 minutos para evitar bugs de milissegundos
+  if (diferencaMinutos >= 16) { 
+    await updateDoc(doc(db, "users", userUid, "produtos", produtoDoc.id), { status: "ativo" });
+  } else {
+    setProdutoEmAnaliseId(produtoDoc.id);
+    setProdutoEmAnaliseDataCriacao(dados.dataCriacao);
+    setStatusAnalise("analisando"); // Garante que a barra aparece
+    produtoEncontrado = true;
+  }
+}
         }
         
         if (!produtoEncontrado) setStatusAnalise("livre");
@@ -355,7 +357,7 @@ setStatusAnalise("analisando");
                   <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex: Smartwatch Ultra Série 9" maxLength={60} className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" required disabled={limiteAtingido} />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-300 mb-1">Link de Afiliado ou Oferta (URL)</label>
+                  <label className="block text-[11px] font-medium text-zinc-300 mb-1">Link de Afiliado ou Site (URL)</label>
                   <input type="url" value={urlAfiliado} onChange={handleMudancaLink} placeholder="https://mercadolivre.com.br/..." className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" required disabled={limiteAtingido} />
                   {statusLink.mensagem && (
                     <p className={`mt-0.5 text-[10px] font-medium ${statusLink.valido ? "text-emerald-400" : "text-rose-400"}`}>

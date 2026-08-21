@@ -12,6 +12,7 @@ export default function DadosAcesso({ userEmail }: DadosAcessoProps) {
   const [enviandoEmail, setEnviandoEmail] = useState(false);
   const [mensagemRedefinicao, setMensagemRedefinicao] = useState<string | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
 
   const handleRedefinirSenha = async () => {
     setEnviandoEmail(true);
@@ -21,7 +22,6 @@ export default function DadosAcesso({ userEmail }: DadosAcessoProps) {
         await sendPasswordResetEmail(auth, auth.currentUser.email);
         setMensagemRedefinicao("E-mail enviado! Verifique sua caixa de entrada.");
       } else {
-        // Fallback visual caso esteja testando sem estar logado de verdade
         setTimeout(() => {
           setMensagemRedefinicao("E-mail de redefinição enviado para " + userEmail);
           setEnviandoEmail(false);
@@ -42,7 +42,6 @@ export default function DadosAcesso({ userEmail }: DadosAcessoProps) {
     
     if (confirmar) {
       setExcluindo(true);
-      // Aqui entrará a lógica de soft-delete no backend no futuro
       setTimeout(() => {
         alert("Sua conta foi desativada e entrará no processo de exclusão de 30 dias.");
         setExcluindo(false);
@@ -64,8 +63,8 @@ export default function DadosAcesso({ userEmail }: DadosAcessoProps) {
               E-mail Cadastrado
             </label>
             <div className="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs font-mono flex items-center justify-between">
-              <span>{userEmail}</span>
-              <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+              <span className="truncate mr-2">{userEmail}</span>
+              <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">
                 Verificado
               </span>
             </div>
@@ -89,19 +88,48 @@ export default function DadosAcesso({ userEmail }: DadosAcessoProps) {
         </div>
       </div>
 
-      {/* CARD DE EXCLUSÃO DE CONTA (ZONA DE PERIGO) */}
-      <div className="bg-zinc-950/80 border border-rose-900/30 rounded-xl p-6 shadow-xl">
-        <h3 className="text-sm font-bold text-rose-500 mb-2 uppercase tracking-wider">Zona de Perigo</h3>
-        <p className="text-[11px] text-zinc-400 mb-4 leading-relaxed">
+      {/* ZONA DE PERIGO COM OS 3 PONTINHOS E A MENSAGEM ORIGINAL */}
+      <div className="bg-zinc-950/80 border border-rose-900/30 rounded-xl p-6 shadow-xl relative">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-sm font-bold text-rose-500 uppercase tracking-wider">Zona de Perigo</h3>
+
+          {/* MENU DOS 3 PONTINHOS */}
+          <div className="relative">
+            <button 
+              onClick={() => setMenuAberto(!menuAberto)}
+              className="p-1.5 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-900 cursor-pointer -mt-1 -mr-2"
+              title="Opções Avançadas"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="5" r="1"/>
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="12" cy="19" r="1"/>
+              </svg>
+            </button>
+
+            {/* DROPDOWN DOS 3 PONTINHOS */}
+            {menuAberto && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
+                <button
+                  onClick={() => {
+                    setMenuAberto(false);
+                    handleExcluirConta();
+                  }}
+                  disabled={excluindo}
+                  className="w-full text-left px-4 py-2.5 text-[11px] font-bold text-rose-500 hover:bg-rose-500/10 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                >
+                  <span className="text-sm">🗑️</span> 
+                  {excluindo ? "Processando..." : "Excluir Conta"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MENSAGEM IMPORTANTE PRESERVADA */}
+        <p className="text-[11px] text-zinc-400 leading-relaxed">
           Ao excluir sua conta, sua vitrine sairá do ar na mesma hora. Seus dados e produtos ficarão retidos por <strong className="text-zinc-300">30 dias</strong> para segurança e depois serão apagados definitivamente.
         </p>
-        <button
-          onClick={handleExcluirConta}
-          disabled={excluindo}
-          className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-        >
-          {excluindo ? "Processando..." : "Excluir Minha Conta Definitivamente"}
-        </button>
       </div>
     </div>
   );

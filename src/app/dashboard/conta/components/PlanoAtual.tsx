@@ -1,38 +1,99 @@
 "use client";
 
 import { useState } from "react";
+import { auth, db } from "@/lib/firebase";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 interface PlanoAtualProps {
   isPro: boolean;
+  cancelouRenovacao?: boolean; 
 }
 
-export default function PlanoAtual({ isPro }: PlanoAtualProps) {
+export default function PlanoAtual({ isPro, cancelouRenovacao = false }: PlanoAtualProps) {
   const [processando, setProcessando] = useState(false);
 
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     setProcessando(true);
-    // Lógica futura para gerar o Pix Copia e Cola / QR Code do Mercado Pago/Asaas
-    setTimeout(() => {
-      alert("Redirecionando para o pagamento via Pix...");
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Você precisa estar logado para assinar.");
+        setProcessando(false);
+        return;
+      }
+
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid, email: user.email }),
+      });
+
+      const data = await response.json();
+      
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert("Erro ao gerar link de pagamento.");
+        setProcessando(false);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+      alert("Erro ao conectar com o servidor de pagamentos.");
       setProcessando(false);
-    }, 1500);
+    }
   };
 
-  const handleCancelarAssinatura = () => {
+  const handleCancelarAssinatura = async () => {
     const confirmar = confirm(
       "Deseja cancelar sua assinatura PRO?\n\n" +
-      "• Se estiver dentro dos 7 dias: Você recebe reembolso automático e volta para o Grátis.\n" +
-      "• Após 7 dias: Você usa o plano até o vencimento e não será cobrado novamente.\n\n" +
+      "• Você continuará com acesso total aos recursos PRO até o fim do seu ciclo atual (ou fim dos 30 dias grátis).\n" +
+      "• Após essa data, sua conta retornará automaticamente para o plano Grátis e não haverá novas cobranças.\n\n" +
       "Confirmar cancelamento?"
     );
 
     if (confirmar) {
       setProcessando(true);
-      // Lógica futura para cancelar recorrência no backend
-      setTimeout(() => {
-        alert("Assinatura cancelada com sucesso. As regras foram aplicadas.");
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userRef = doc(db, 'users', user.uid);
+          await updateDoc(userRef, {
+            cancelouRenovacao: true,
+            dataCancelamento: serverTimestamp(),
+          });
+          
+          alert("Cancelamento programado com sucesso! Você continuará PRO até o fim do ciclo.");
+          window.location.reload(); 
+        }
+      } catch (error) {
+        console.error("Erro ao cancelar:", error);
+        alert("Erro ao processar sua solicitação.");
         setProcessando(false);
-      }, 1500);
+      }
+    }
+  };
+
+  const handleReativarAssinatura = async () => {
+    const confirmar = confirm("Deseja reativar sua assinatura PRO e manter seus benefícios contínuos?");
+    
+    if (confirmar) {
+      setProcessando(true);
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userRef = doc(db, 'users', user.uid);
+          await updateDoc(userRef, {
+            cancelouRenovacao: false, // Tira o status de cancelamento
+          });
+          
+          alert("Assinatura reativada com sucesso!");
+          window.location.reload(); 
+        }
+      } catch (error) {
+        console.error("Erro ao reativar:", error);
+        alert("Erro ao processar sua solicitação.");
+        setProcessando(false);
+      }
     }
   };
 
@@ -75,7 +136,7 @@ export default function PlanoAtual({ isPro }: PlanoAtualProps) {
             </div>
             <div className="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-800/80 pt-2">
               <span>Após os 3 meses:</span>
-              <span>R$ 29,99 / mês</span>
+              <span>R$ 29,90 / mês</span>
             </div>
           </div>
 
@@ -84,7 +145,7 @@ export default function PlanoAtual({ isPro }: PlanoAtualProps) {
             disabled={processando}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50 mb-3"
           >
-            {processando ? "Gerando Pix..." : "🚀 Fazer Upgrade para PRO (Via Pix)"}
+            {processando ? "Conectando ao Mercado Pago..." : "🚀 Fazer Upgrade para PRO"}
           </button>
         </div>
       )}
@@ -93,28 +154,48 @@ export default function PlanoAtual({ isPro }: PlanoAtualProps) {
       {isPro && (
         <div className="flex-1 flex flex-col">
           <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
-            Você tem <strong>produtos ilimitados</strong> e acesso total aos rastreios (Pixels). Sua assinatura é renovada via Pix Recorrente.
+            Você tem <strong>produtos ilimitados</strong> e acesso total aos rastreios (Pixels).
           </p>
 
           <div className="bg-zinc-900/50 p-4 rounded-lg border border-zinc-800/50 mb-6">
             <div className="flex justify-between items-center text-sm mb-3">
-              <span className="text-zinc-400">Valor Mensal:</span>
-              <span className="text-white font-bold">R$ 19,99</span>
+              <span className="text-zinc-400">Plano Ativo:</span>
+              <span className="text-white font-bold">CortCut Pro</span>
             </div>
             <div className="flex justify-between items-center text-sm border-t border-zinc-800/80 pt-3">
               <span className="text-zinc-400">Próxima Renovação:</span>
-              <span className="text-zinc-300 font-mono text-xs">Aguardando Pagamento Pix</span>
+              {cancelouRenovacao ? (
+                <span className="text-amber-400 font-bold text-xs">Cancelada (Expira no fim do ciclo)</span>
+              ) : (
+                <span className="text-zinc-300 font-mono text-xs">Automática (Mercado Pago)</span>
+              )}
             </div>
           </div>
 
-          <div className="mt-auto pt-4 border-t border-zinc-800/50 flex justify-between items-center">
-            <button
-              onClick={handleCancelarAssinatura}
-              disabled={processando}
-              className="text-xs font-bold text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
-            >
-              Cancelar Assinatura
-            </button>
+          {/* BOTÕES: CANCELAR OU REATIVAR ASSINATURA */}
+          <div className="mt-auto pt-4 border-t border-zinc-800/50 flex flex-col gap-3">
+            {cancelouRenovacao ? (
+              <div className="space-y-3">
+                <p className="text-amber-500 text-center text-[11px] font-bold bg-amber-500/10 py-2 rounded-lg border border-amber-500/20">
+                  ⚠️ Cancelamento programado.
+                </p>
+                <button
+                  onClick={handleReativarAssinatura}
+                  disabled={processando}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {processando ? "Processando..." : "Reativar Assinatura PRO"}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleCancelarAssinatura}
+                disabled={processando}
+                className="w-full py-2.5 bg-transparent border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {processando ? "Processando..." : "Cancelar Assinatura"}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -126,7 +207,7 @@ export default function PlanoAtual({ isPro }: PlanoAtualProps) {
           <path d="m9 12 2 2 4-4"/>
         </svg>
         <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
-          Garantia de 7 Dias
+          Pagamento Seguro (Mercado Pago)
         </span>
       </div>
     </div>

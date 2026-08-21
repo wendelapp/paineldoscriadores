@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase"; // Agora importamos o db
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore"; // Importando funções do Firestore
 
 // Importando nossos componentes modulares
 import DadosAcesso from "./DadosAcesso";
@@ -10,11 +11,12 @@ import PlanoAtual from "./PlanoAtual";
 import HistoricoPagamentos from "./HistoricoPagamentos";
 import ModalRegrasSeguranca from "./ModalRegrasSeguranca";
 import LegalModal, { LegalType } from "@/modules/auth/components/TermsModal";
-import AuthFooter from "@/modules/auth/components/AuthFooter"; // <--- SEU COMPONENTE DE RODAPÉ REUTILIZÁVEL
+import AuthFooter from "@/modules/auth/components/AuthFooter"; 
 
 export default function GerenciarContaContent() {
   const [userEmail, setUserEmail] = useState("carregando...");
-  const [isPro, setIsPro] = useState(true); // Simulador: Mude para false para testar o plano Grátis
+  const [isPro, setIsPro] = useState(false); // Agora começa falso e o Firebase decide
+  const [cancelouRenovacao, setCancelouRenovacao] = useState(false); // Novo estado
   
   // Estados para os Modals
   const [isModalSegurancaOpen, setIsModalSegurancaOpen] = useState(false);
@@ -22,14 +24,33 @@ export default function GerenciarContaContent() {
   const [activeLegalType, setActiveLegalType] = useState<LegalType>('termos');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    let unsubscribeSnapshot: () => void;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user && user.email) {
         setUserEmail(user.email);
+
+        // Escuta o documento do usuário no Firebase em TEMPO REAL
+        const userRef = doc(db, 'users', user.uid);
+        unsubscribeSnapshot = onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setIsPro(data.isPro || false);
+            setCancelouRenovacao(data.cancelouRenovacao || false);
+          }
+        });
+
       } else {
         setUserEmail("criador@cortcut.com");
+        setIsPro(false);
+        setCancelouRenovacao(false);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+    };
   }, []);
 
   const handleOpenLegal = (type: LegalType) => {
@@ -44,7 +65,7 @@ export default function GerenciarContaContent() {
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight">Gerenciar Conta</h2>
         <p className="text-xs text-zinc-400 mt-1">
-          Gerencie sua assinatura via Pix, seus dados de acesso e confira o histórico de pagamentos.
+          Gerencie sua assinatura, seus dados de acesso e confira o histórico de pagamentos.
         </p>
       </div>
 
@@ -56,7 +77,8 @@ export default function GerenciarContaContent() {
         </div>
         
         <div className="lg:col-span-1">
-          <PlanoAtual isPro={isPro} />
+          {/* Agora o componente filho recebe os dados reais do Firebase! */}
+          <PlanoAtual isPro={isPro} cancelouRenovacao={cancelouRenovacao} />
         </div>
         
         <div className="lg:col-span-1">
@@ -75,7 +97,7 @@ export default function GerenciarContaContent() {
         </button>
       </div>
 
-      {/* RODAPÉ REUTILIZÁVEL (O mesmo do login, mantendo o padrão em todo o app) */}
+      {/* RODAPÉ REUTILIZÁVEL */}
       <div className="mt-12">
         <AuthFooter onOpenLegal={handleOpenLegal} />
       </div>

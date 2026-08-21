@@ -5,7 +5,6 @@ import { auth, db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, writeBatch, doc, limit, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
-// Tipos de notificações
 type Notification = {
   id: string;
   title: string;
@@ -19,7 +18,6 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
-  const [alertFrequency, setAlertFrequency] = useState("7");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 1. Identificar o usuário logado
@@ -105,7 +103,7 @@ export default function NotificationBell() {
     }
   };
 
-  // 4. APAGAR A NOTIFICAÇÃO (Nova Função)
+  // 4. Apagar a notificação individual
   const deleteNotification = async (notifId: string) => {
     if (!userId) return;
     try {
@@ -115,15 +113,12 @@ export default function NotificationBell() {
     }
   };
 
-  const handleFrequencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setAlertFrequency(e.target.value);
-  };
-
   const getIcon = (type: string) => {
     switch (type) {
       case 'stats': return '📊';
       case 'success': return '🔥';
       case 'system': return '🚀';
+      case 'warning': return '⚠️';
       default: return '🔔';
     }
   };
@@ -134,7 +129,7 @@ export default function NotificationBell() {
       {/* Botão do Sino */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors focus:outline-none"
+        className="relative p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -148,7 +143,7 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown de Notificações */}
+      {/* Dropdown de Notificações Limpo */}
       {isOpen && (
         <div className="absolute right-0 top-10 mt-3 w-80 sm:w-96 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           
@@ -187,10 +182,10 @@ export default function NotificationBell() {
                         <span className="text-[10px] text-zinc-500 whitespace-nowrap">
                           {notif.date}
                         </span>
-                        {/* Botão X de apagar a notificação */}
+                        {/* Botão X para apagar */}
                         <button 
                           onClick={() => deleteNotification(notif.id)}
-                          className="text-zinc-600 hover:text-rose-400 transition-colors"
+                          className="text-zinc-600 hover:text-rose-400 transition-colors cursor-pointer"
                           title="Apagar notificação"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -209,19 +204,6 @@ export default function NotificationBell() {
                 </div>
               ))
             )}
-          </div>
-
-          <div className="p-3 border-t border-zinc-800 bg-zinc-950/50 flex justify-between items-center">
-            <span className="text-xs text-zinc-500 font-medium">Receber relatórios a cada:</span>
-            <select
-              value={alertFrequency}
-              onChange={handleFrequencyChange}
-              className="bg-zinc-900 text-xs text-zinc-300 border border-zinc-700 rounded-md px-2 py-1 outline-none focus:border-blue-500 cursor-pointer"
-            >
-              <option value="7">7 dias</option>
-              <option value="15">15 dias</option>
-              <option value="30">30 dias</option>
-            </select>
           </div>
         </div>
       )}
