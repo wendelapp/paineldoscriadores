@@ -1,29 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 🚨 ADICIONADO useEffect
 import { useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase"; // Importando o auth do seu Firebase
+import { signOut, onAuthStateChanged } from "firebase/auth"; // 🚨 ADICIONADO onAuthStateChanged
+import { auth } from "@/lib/firebase";
 import Sidebar from "./components/Sidebar";
-import NotificationBell from "./components/NotificationBell"; // IMPORTAMOS O SININHO AQUI
+import NotificationBell from "./components/NotificationBell";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const router = useRouter(); // Iniciando o roteador para poder trocar de página
+  
+  // 🚨 ESTADO NOVO: Trava a tela enquanto checa quem é o usuário
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true); 
 
-  // FUNÇÃO DE LOGOUT NOVA AQUI
+  const router = useRouter();
+
+  // 🚨 O LEÃO DE CHÁCARA (Route Guard): Verifica se está logado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Se NÃO tem usuário, chuta para a tela inicial (login)
+        router.push("/");
+      } else {
+        // Se TEM usuário, libera a entrada no painel
+        setIsLoadingAuth(false);
+      }
+    });
+
+    return () => unsubscribe(); // Limpa o ouvinte ao sair
+  }, [router]);
+
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Desloga do Firebase
-      router.push("/");    // Redireciona para a raiz (página inicial/login)
-      router.refresh();    // Atualiza a página para limpar o cache visual
+      await signOut(auth);
+      router.push("/"); 
+      router.refresh(); 
     } catch (error) {
       console.error("Erro ao sair:", error);
       alert("Erro ao tentar sair da conta.");
     }
   };
 
+  // 🚨 TELA DE ESPERA: Evita que o "fantasma" apareça antes do Firebase responder
+  if (isLoadingAuth) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#0a0a0a]">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // 👇 DAQUI PARA BAIXO NADA MUDOU, É O SEU CÓDIGO ORIGINAL INTACTO 👇
   return (
     <div className="flex h-screen bg-[#0a0a0a] text-zinc-300 font-sans overflow-hidden">
       
@@ -78,7 +106,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* LADO DIREITO DO TOPO */}
           <div className="flex items-center gap-3 relative">
             
-            {/* SUBSTITUÍMOS O BOTÃO ESTÁTICO PELO COMPONENTE AQUI */}
             <NotificationBell />
 
             <div className="relative">
@@ -101,7 +128,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className="px-3 py-2 border-b border-zinc-800">
                       <p className="text-[11px] font-bold text-white">Minha Conta</p>
                     </div>
-                    {/* BOTÃO DE SAIR CHAMANDO A FUNÇÃO handleLogout */}
                     <button 
                       onClick={handleLogout}
                       className="w-full text-left px-3 py-2 text-xs text-rose-400 hover:bg-zinc-800 transition-colors flex items-center gap-2 font-medium cursor-pointer"

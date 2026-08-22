@@ -1,4 +1,3 @@
-// src/modules/auth/subscription/PricingCard.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,10 +6,17 @@ import { auth } from "@/lib/firebase";
 
 export default function PricingCard() {
   const router = useRouter();
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeModal, setWelcomeModal] = useState<'gratis' | 'pro' | null>(null);
 
-  const irParaPainelGratis = () => setShowWelcome(true);
-  const entrarNoPainel = () => router.push("/dashboard");
+  const irParaPainelGratis = () => {
+    setWelcomeModal('gratis');
+  };
+
+  const entrarNoPainel = () => {
+    setWelcomeModal(null);
+    router.push("/dashboard");
+  };
+
   const assinarPro = async () => {
     try {
       const user = auth.currentUser;
@@ -43,7 +49,7 @@ export default function PricingCard() {
     <>
       {/* Container com pt-16 no mobile para garantir que o título nunca fique cortado no topo */}
       <div className="w-full max-w-4xl mx-auto p-4 pt-16 md:pt-8 animate-in fade-in duration-300">
-        {/* --- ADICIONE ESTE BLOCO AQUI --- */}
+        {/* --- BOTÃO VOLTAR --- */}
         <div className="flex justify-end mb-4 md:mb-0 md:-mt-4 relative z-10">
           <button 
             onClick={() => router.push("/dashboard")} 
@@ -52,7 +58,6 @@ export default function PricingCard() {
             ✕ Voltar
           </button>
         </div>
-        {/* ------------------------------- */}
         
         {/* Título responsivo */}
         <div className="text-center mb-8 space-y-2">
@@ -73,7 +78,7 @@ export default function PricingCard() {
               <h3 className="text-lg md:text-xl font-bold text-white mt-4">Plano Grátis</h3>
               <div className="mt-2 mb-6 flex items-baseline">
                 <span className="text-3xl md:text-4xl font-black text-white">R$ 0</span>
-                <span className="text-zinc-500 ml-2 text-xs md:text-sm font-medium">/ para sempre</span>
+                <span className="text-zinc-500 ml-2 text-xs md:text-sm font-medium">/ Para Sempre (ótimo para testar)</span>
               </div>
               
               <h4 className="text-[11px] md:text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wider">O que está incluso:</h4>
@@ -81,7 +86,7 @@ export default function PricingCard() {
                 <li className="flex items-center gap-2"><span>✓</span> Até 10 produtos publicados na vitrine</li>
                 <li className="flex items-center gap-2"><span>✓</span> Integração com Redes Sociais (Link na Bio)</li>
                 <li className="flex items-center gap-2"><span>✓</span> Proteção anti-fraude na auditoria</li>
-                <li className="flex items-center gap-2 text-zinc-500"><span>⚠️</span> Marca d'água nas mídias da vitrine</li>
+                <li className="flex items-center gap-2 text-zinc-500"><span>💡</span> Gerencie ou delete produtos quando quiser</li>
               </ul>
             </div>
 
@@ -105,10 +110,10 @@ export default function PricingCard() {
               </span>
               <h3 className="text-lg md:text-xl font-bold text-white mt-4">CortCut Pro</h3>
               <div className="mt-2 mb-3">
-                <div className="text-xl md:text-2xl font-black text-white">30 Dias Grátis</div>
+                <div className="text-xl md:text-2xl font-black text-white">R$ 19,90 <span className="text-xs font-normal text-zinc-400">/mês nos 3 primeiros meses</span></div>
                 <div className="mt-1 text-xs font-medium space-y-0.5">
-                  <p className="text-blue-400">🔥 Depois: 3 meses por R$ 19,99/mês</p>
-                  <p className="text-zinc-500">Preço original: R$ 29,90/mês</p>
+                  <p className="text-blue-400">🔥 Depois: R$ 29,90/mês</p>
+                  <p className="text-zinc-500">Economize com a oferta de lançamento</p>
                 </div>
               </div>
               <p className="text-emerald-400 text-[11px] font-medium mb-5">✓ Sem fidelidade. Cancele quando quiser.</p>
@@ -132,7 +137,7 @@ export default function PricingCard() {
                 onClick={assinarPro}
                 className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs md:text-sm rounded-xl transition-colors shadow-lg cursor-pointer"
               >
-                Testar Pro Grátis por 30 Dias
+                Assinar Plano Pro Agora
               </button>
             </div>
           </div>
@@ -144,19 +149,25 @@ export default function PricingCard() {
         </div>
       </div>
 
-      {/* MODAL DE BOAS-VINDAS */}
-      {showWelcome && (
+      {/* MODAL DE BOAS-VINDAS DINÂMICO (GRÁTIS vs PRO) */}
+      {welcomeModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
           <div className="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-2xl p-6 sm:p-8 shadow-2xl relative text-center space-y-5">
             
             <div className="w-16 h-16 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-1">
-              🎉
+              {welcomeModal === 'pro' ? '🚀' : '🎉'}
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-2xl font-black text-white tracking-tight">Bem-vindo ao CortCut!</h3>
+              <h3 className="text-2xl font-black text-white tracking-tight">
+                {welcomeModal === 'pro' ? 'Bem-vindo ao CortCut Pro!' : 'Bem-vindo ao CortCut!'}
+              </h3>
               <p className="text-sm text-zinc-300 leading-relaxed">
-                Seu plano <strong>Grátis para Sempre</strong> está liberado. Cadastre até 10 produtos e configure sua vitrine.
+                {welcomeModal === 'pro' ? (
+                  <>Sua assinatura <strong>Profissional</strong> foi ativada com sucesso. Todos os recursos avançados estão liberados!</>
+                ) : (
+                  <>Seu <strong>Plano Grátis para Sempre</strong> está liberado. Cadastre até 10 produtos e comece a testar.</>
+                )}
               </p>
             </div>
 
@@ -164,7 +175,11 @@ export default function PricingCard() {
               <div className="flex items-start gap-2.5">
                 <span className="text-emerald-400 font-bold mt-0.5">✓</span>
                 <p className="text-xs text-zinc-300">
-                  <strong>Transparência total:</strong> Você não pagará nada no plano gratuito.
+                  {welcomeModal === 'pro' ? (
+                    <><strong>Escala Total:</strong> Produtos ilimitados na vitrine, rastreio avançado de conversão e sem marca d'água.</>
+                  ) : (
+                    <><strong>Transparência total:</strong> Use o plano gratuito por tempo ilimitado com limite de 10 produtos ativos.</>
+                  )}
                 </p>
               </div>
               <div className="flex items-start gap-2.5">
@@ -179,7 +194,7 @@ export default function PricingCard() {
               onClick={entrarNoPainel}
               className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg cursor-pointer text-sm"
             >
-              Aceitar e Conhecer meu Painel
+              {welcomeModal === 'pro' ? 'Acessar Meu Painel Pro' : 'Conhecer Meu Painel Grátis'}
             </button>
             
           </div>

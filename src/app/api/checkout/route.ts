@@ -18,10 +18,10 @@ export async function POST(request: Request) {
       body: {
         items: [
           {
-            id: 'cortcut-pro-teste',
-            title: 'CortCut Pro - Teste de Produção (R$ 1,00)',
+            id: 'cortcut-pro-lancamento',
+            title: 'CortCut Pro - Plano Profissional (Oferta de Lançamento)',
             quantity: 1,
-            unit_price: 5.00, // Valor simbólico de 5 real para o teste real
+            unit_price: 19.90, // 🎯 Valor real ajustado para a oferta de lançamento
             currency_id: 'BRL',
           },
         ],
