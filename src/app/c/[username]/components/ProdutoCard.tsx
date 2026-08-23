@@ -41,7 +41,7 @@ export default function ProdutoCard({ produto, onVisualizar, onClique }: Produto
           />
           {produto.urlVideo && (
             <div className="absolute top-2 left-2 bg-blue-600/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-md">
-              <span>▶</span> Vídeo 9:16
+              <span>▶</span> Vídeo
             </div>
           )}
         </div>

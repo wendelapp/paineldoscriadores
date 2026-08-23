@@ -8,12 +8,13 @@ export const PLATAFORMAS_PERMITIDAS = [
   "shopee.com.br",
   "amazon.com",
   "amazon.com.br",
-  "amzn.to", // Link curto oficial da Amazon
+  "amzn.to", 
   "magazineluiza.com.br",
 
   // Principais Plataformas de Infoprodutos e Afiliados
   "hotmart.com",
-  "hotm.art", // Link curto oficial da Hotmart
+  "go.hotmart.com", // <--- Adicionado aqui para liberar o link oficial de afiliado
+  "hotm.art", 
   "eduzz.com",
   "app.eduzz.com",
   "monetizze.com.br",
@@ -36,8 +37,13 @@ const PALAVRAS_PROIBIDAS = [
 ];
 
 // 🚨 NOVA TRAVA: Encurtadores Genéricos Proibidos
-const ENCURTADORES_PROIBIDOS = [
-  "bit.ly", "tinyurl.com", "t.co", "ow.ly", "shorte.st", "adf.ly", "goo.gl", "cutt.ly", "encurta.net"
+export const ENCURTADORES_PROIBIDOS = [
+  "bit.ly",
+  "tinyurl.com",
+  "cutt.ly",
+  "ow.ly",
+  "buff.ly",
+  "shorturl.at"
 ];
 
 // 1. VALIDADOR DE LINK DE AFILIADO (Blindagem contra Black Hat)
@@ -51,7 +57,19 @@ export function analisarLink(url: string) {
     const dominio = urlObj.hostname.toLowerCase();
     const linkCompleto = url.toLowerCase();
 
-    // Trava 1: Bloqueio de Encurtadores que mascaram links maliciosos
+    // Trava 1: Verificação Cirúrgica de Domínio (Validado PRIMEIRO para liberar links oficiais de redirecionamento como go.hotmart.com)
+    const plataformaAutorizada = PLATAFORMAS_PERMITIDAS.some(
+      plat => dominio === plat || dominio.endsWith(`.${plat}`)
+    );
+    
+    if (!plataformaAutorizada) {
+      return { 
+        valido: false, 
+        mensagem: "Plataforma não reconhecida. Use parceiros oficiais ou redes sociais permitidas." 
+      };
+    }
+
+    // Trava 2: Bloqueio de Encurtadores Genéricos Maliciosos (bit.ly, tinyurl, etc., excluindo os oficiais)
     const usaEncurtador = ENCURTADORES_PROIBIDOS.some(enc => dominio.includes(enc));
     if (usaEncurtador) {
       return {
@@ -60,7 +78,7 @@ export function analisarLink(url: string) {
       };
     }
 
-    // Trava 2: Filtro de Palavras Proibidas
+    // Trava 3: Filtro de Palavras Proibidas
     const contemProibido = PALAVRAS_PROIBIDAS.some(palavra => linkCompleto.includes(palavra));
     if (contemProibido) {
       return { 
@@ -69,22 +87,11 @@ export function analisarLink(url: string) {
       };
     }
 
-    // Trava 3: Verificação Cirúrgica de Domínio (Bloqueia sites falsos como "meuhotmart.com")
-    const plataformaAutorizada = PLATAFORMAS_PERMITIDAS.some(
-      plat => dominio === plat || dominio.endsWith(`.${plat}`)
-    );
-    
-    if (plataformaAutorizada) {
-      return { 
-        valido: true, 
-        mensagem: "✅ Link seguro e autorizado!" 
-      };
-    } else {
-      return { 
-        valido: false, 
-        mensagem: "Plataforma não reconhecida. Use parceiros oficiais ou redes sociais permitidas." 
-      };
-    }
+    return { 
+      valido: true, 
+      mensagem: "✅ Link seguro e autorizado!" 
+    };
+
   } catch (error) {
     return { 
       valido: false, 
