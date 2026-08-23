@@ -44,12 +44,12 @@ export default function PlanoAtual({ isPro, cancelouRenovacao = false }: PlanoAt
   };
 
   const handleCancelarAssinatura = async () => {
-    const confirmar = confirm(
-      "Deseja cancelar sua assinatura PRO?\n\n" +
-      "• Você continuará com acesso total aos recursos PRO até o fim do seu ciclo atual (ou fim dos 30 dias grátis).\n" +
-      "• Após essa data, sua conta retornará automaticamente para o plano Grátis e não haverá novas cobranças.\n\n" +
-      "Confirmar cancelamento?"
-    );
+   const confirmar = confirm(
+  "Deseja cancelar sua assinatura PRO?\n\n" +
+  "• Você continuará com acesso ilimitado e recursos PRO até o fim do seu ciclo de cobrança atual.\n" +
+  "• Após essa data, sua conta retornará para o plano Grátis (limitado a 10 produtos ativos) e não haverá novas cobranças.\n\n" +
+  "Confirmar cancelamento?"
+);
 
     if (confirmar) {
       setProcessando(true);
@@ -132,7 +132,7 @@ export default function PlanoAtual({ isPro, cancelouRenovacao = false }: PlanoAt
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider font-bold mb-2">Oferta de Upgrade</p>
             <div className="flex justify-between items-end mb-2">
               <span className="text-sm text-white font-medium">3 Primeiros Meses:</span>
-              <span className="text-lg text-emerald-400 font-black">R$ 1,99 <span className="text-[10px] text-zinc-500 font-normal">/mês</span></span>
+              <span className="text-lg text-emerald-400 font-black">R$ 19,90 <span className="text-[10px] text-zinc-500 font-normal">/mês</span></span>
             </div>
             <div className="flex justify-between items-center text-xs text-zinc-500 border-t border-zinc-800/80 pt-2">
               <span>Após os 3 meses:</span>

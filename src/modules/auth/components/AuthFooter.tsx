@@ -15,6 +15,7 @@ const footerLinks: { label: string; type: LegalType }[] = [
   { label: "Suporte", type: "suporte" },
   { label: "Denúncia", type: "denuncia" },
   { label: "Assinatura e Reembolso", type: "assinatura" },
+  { label: "Quem Somos", type: "quem_somos" }, // <--- Adicionado aqui
 ];
 
 export default function AuthFooter({ onOpenLegal }: AuthFooterProps) {

@@ -8,13 +8,17 @@ export const PLATAFORMAS_PERMITIDAS = [
   "shopee.com.br",
   "amazon.com",
   "amazon.com.br",
+  "amzn.to", // Link curto oficial da Amazon
   "magazineluiza.com.br",
 
   // Principais Plataformas de Infoprodutos e Afiliados
   "hotmart.com",
+  "hotm.art", // Link curto oficial da Hotmart
   "eduzz.com",
+  "app.eduzz.com",
   "monetizze.com.br",
   "kiwify.com.br",
+  "pay.kiwify.com.br",
 
   // Plataformas Especializadas em Produtos Físicos / Encapsulados
   "doppus.com",
@@ -23,12 +27,20 @@ export const PLATAFORMAS_PERMITIDAS = [
   // Redes Sociais e Mídias para Direcionamento
   "tiktok.com",
   "instagram.com",
+  "youtube.com",
+  "youtu.be"
 ];
 
 const PALAVRAS_PROIBIDAS = [
-  "bet", "cassino", "apostas", "blaze", "tigrinho", "fortune", "crash", "rolet", "spin"
+  "bet", "cassino", "apostas", "blaze", "tigrinho", "fortune", "crash", "rolet", "spin", "roleta", "aviator"
 ];
 
+// 🚨 NOVA TRAVA: Encurtadores Genéricos Proibidos
+const ENCURTADORES_PROIBIDOS = [
+  "bit.ly", "tinyurl.com", "t.co", "ow.ly", "shorte.st", "adf.ly", "goo.gl", "cutt.ly", "encurta.net"
+];
+
+// 1. VALIDADOR DE LINK DE AFILIADO (Blindagem contra Black Hat)
 export function analisarLink(url: string) {
   if (!url || url.trim() === "") {
     return { valido: false, mensagem: "" };
@@ -39,15 +51,29 @@ export function analisarLink(url: string) {
     const dominio = urlObj.hostname.toLowerCase();
     const linkCompleto = url.toLowerCase();
 
+    // Trava 1: Bloqueio de Encurtadores que mascaram links maliciosos
+    const usaEncurtador = ENCURTADORES_PROIBIDOS.some(enc => dominio.includes(enc));
+    if (usaEncurtador) {
+      return {
+        valido: false,
+        mensagem: "Segurança: Encurtadores de link (ex: bit.ly) são proibidos. Use o link oficial da plataforma."
+      };
+    }
+
+    // Trava 2: Filtro de Palavras Proibidas
     const contemProibido = PALAVRAS_PROIBIDAS.some(palavra => linkCompleto.includes(palavra));
     if (contemProibido) {
       return { 
         valido: false, 
-        mensagem: "Bloqueado: Não permitimos links de jogos de azar ou apostas." 
+        mensagem: "Bloqueado: Identificamos termos de jogos de azar ou promessas enganosas." 
       };
     }
 
-    const plataformaAutorizada = PLATAFORMAS_PERMITIDAS.some(plat => dominio.includes(plat));
+    // Trava 3: Verificação Cirúrgica de Domínio (Bloqueia sites falsos como "meuhotmart.com")
+    const plataformaAutorizada = PLATAFORMAS_PERMITIDAS.some(
+      plat => dominio === plat || dominio.endsWith(`.${plat}`)
+    );
+    
     if (plataformaAutorizada) {
       return { 
         valido: true, 
@@ -62,7 +88,59 @@ export function analisarLink(url: string) {
   } catch (error) {
     return { 
       valido: false, 
-      mensagem: "Digite um link válido (começando com http:// ou https://)" 
+      mensagem: "Digite um link válido (começando com http:// ou https://)." 
     };
+  }
+}
+
+// 2. VALIDADOR DE VÍDEO (Apenas YouTube)
+export function analisarLinkVideo(url: string) {
+  if (!url || url.trim() === "") return { valido: true, mensagem: "" }; // Vídeo é opcional
+
+  try {
+    const urlObj = new URL(url);
+    const dominio = urlObj.hostname.toLowerCase();
+    
+    // Aceita apenas variações oficiais do YouTube
+    const ehYoutube = dominio === "youtube.com" || dominio.endsWith(".youtube.com") || dominio === "youtu.be";
+    
+    if (!ehYoutube) {
+      return { valido: false, mensagem: "Segurança: O link de vídeo deve ser exclusivamente do YouTube." };
+    }
+    
+    return { valido: true, mensagem: "✅ Vídeo válido." };
+  } catch (error) {
+    return { valido: false, mensagem: "URL de vídeo inválida." };
+  }
+}
+
+// 3. VALIDADOR DE IMAGEM (Obriga uso de HTTPS para evitar alertas no navegador do cliente)
+// 3. VALIDADOR DE IMAGEM TURBINADO (Obriga HTTPS e extensão de imagem)
+export function analisarLinkImagem(url: string) {
+  if (!url || url.trim() === "") return { valido: true, mensagem: "" };
+
+  try {
+    const urlObj = new URL(url);
+    
+    // Trava 1: Protocolo seguro
+    if (urlObj.protocol !== "https:") {
+      return { valido: false, mensagem: "Segurança: A imagem deve usar um link seguro (https://)." };
+    }
+
+    // Trava 2: Verifica se é um arquivo de imagem (termina com .jpg, .png, etc)
+    const caminho = urlObj.pathname.toLowerCase();
+    const extensoesValidas = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    const ehArquivoImagem = extensoesValidas.some(ext => caminho.endsWith(ext));
+
+    if (!ehArquivoImagem) {
+       return { 
+         valido: false, 
+         mensagem: "Cole o endereço direto da imagem (deve terminar em .jpg, .png ou .webp)." 
+       };
+    }
+    
+    return { valido: true, mensagem: "✅ Imagem válida." };
+  } catch (error) {
+    return { valido: false, mensagem: "URL de imagem inválida." };
   }
 }

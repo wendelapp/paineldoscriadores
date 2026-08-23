@@ -13,6 +13,8 @@ import ProgressoAnalise from "./ProgressoAnalise";
 import ProTrackingFields from "./ProTrackingFields";
 import PricingCard from "@/modules/auth/subscription/PricingCard";
 
+import {analisarLinkVideo, analisarLinkImagem } from "@/lib/utils/linkValidator";
+
 export default function FormProduto() {
   const [userUid, setUserUid] = useState<string | null>(null);
   
@@ -45,6 +47,10 @@ export default function FormProduto() {
   const [produtoEmAnaliseDataCriacao, setProdutoEmAnaliseDataCriacao] = useState<any>(null);
 
   const [carregandoFila, setCarregandoFila] = useState(true);
+
+  const [erroLink, setErroLink] = useState("");
+  const [erroImagem, setErroImagem] = useState("");
+  const [erroVideo, setErroVideo] = useState("");
 
   useEffect(() => {
     const verificarFilaAnalise = async () => {
@@ -134,11 +140,23 @@ export default function FormProduto() {
     }
   };
 
-  const handlePublicar = async (e: React.FormEvent) => {
+ const handlePublicar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userUid || !titulo) return;
 
+    // 🚨 TRAVA DE SEGURANÇA MÁXIMA ANTES DE SALVAR NO BANCO
+    const analiseAfiliado = analisarLink(urlAfiliado);
+    const analiseImg = analisarLinkImagem(urlImagem);
+    const analiseVid = analisarLinkVideo(urlVideo);
+
+    if (!analiseAfiliado.valido || !analiseImg.valido || !analiseVid.valido) {
+      alert("⚠️ Segurança: Corrija os links inválidos ou bloqueados antes de publicar.");
+      return; // Bloqueia a ação e não deixa ir para o Firebase de jeito nenhum
+    }
+
     setSalvando(true);
+    
+    
     
     const snapshotAtual = await getDocs(collection(db, "users", userUid, "produtos"));
     if (!isPro && snapshotAtual.size >= 10) {
@@ -288,7 +306,7 @@ export default function FormProduto() {
                 <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex: Smartwatch Ultra Série 9" maxLength={60} className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" required disabled={limiteAtingido} />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-300 mb-1">Link de Afiliado ou Site (URL)</label>
+                <label className="block text-[11px] font-medium text-zinc-300 mb-1">Link de Afiliado (URL)</label>
                 <input type="url" value={urlAfiliado} onChange={handleMudancaLink} placeholder="https://mercadolivre.com.br/..." className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" required disabled={limiteAtingido} />
                 {statusLink.mensagem && (
                   <p className={`mt-0.5 text-[10px] font-medium ${statusLink.valido ? "text-emerald-400" : "text-rose-400"}`}>
@@ -302,11 +320,36 @@ export default function FormProduto() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-medium text-zinc-300 mb-1">Link da Imagem (URL)</label>
-                <input type="url" value={urlImagem} onChange={(e) => setUrlImagem(e.target.value)} placeholder="https://exemplo.com/foto.jpg" className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" disabled={limiteAtingido} />
+                <input 
+                  type="url" 
+                  value={urlImagem} 
+                  onChange={(e) => {
+                    setUrlImagem(e.target.value);
+                    const analise = analisarLinkImagem(e.target.value);
+                    setErroImagem(analise.valido ? "" : analise.mensagem);
+                  }} 
+                  placeholder="https://exemplo.com/foto.jpg" 
+                  className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" 
+                  disabled={limiteAtingido} 
+                />
+                {erroImagem && <p className="mt-0.5 text-[10px] font-medium text-rose-400">{erroImagem}</p>}
               </div>
               <div>
                 <label className="block text-[11px] font-medium text-zinc-300 mb-1">Link do Vídeo (YouTube)</label>
-                <input type="url" value={urlVideo} onChange={(e) => setUrlVideo(e.target.value)} onBlur={handleBlurVideo} placeholder="https://youtube.com/watch?v=..." className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" disabled={limiteAtingido} />
+                <input 
+                  type="url" 
+                  value={urlVideo} 
+                  onChange={(e) => {
+                    setUrlVideo(e.target.value);
+                    const analise = analisarLinkVideo(e.target.value);
+                    setErroVideo(analise.valido ? "" : analise.mensagem);
+                  }} 
+                  onBlur={handleBlurVideo} 
+                  placeholder="https://youtube.com/watch?v=..." 
+                  className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" 
+                  disabled={limiteAtingido} 
+                />
+                {erroVideo && <p className="mt-0.5 text-[10px] font-medium text-rose-400">{erroVideo}</p>}
               </div>
             </div>
 

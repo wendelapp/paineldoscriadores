@@ -1,6 +1,6 @@
 "use client";
 
-export type LegalType = 'termos' | 'privacidade' | 'cookies' | 'faq' | 'suporte' | 'denuncia' | 'assinatura';
+export type LegalType = "termos" | "privacidade" | "cookies" | "faq" | "suporte" | "denuncia" | "assinatura" | "quem_somos";
 
 interface LegalModalProps {
   isOpen: boolean;
@@ -181,14 +181,14 @@ const CONTENT_MAP = {
         <p>O CortCut foi desenvolvido para criadores que buscam escalar suas vendas com segurança e previsibilidade.</p>
         
         <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-          <h4 className="font-bold text-white mb-2 uppercase text-xs tracking-wider">💎 1. Ciclo de Assinatura e Valores</h4>
-          <p className="text-zinc-400 text-xs mb-2">Trabalhamos com planos transparentes e sem surpresas:</p>
-          <ul className="list-disc pl-5 space-y-1 text-zinc-400 text-xs">
-            <li><strong>Período Grátis:</strong> 30 dias iniciais para testar a plataforma e publicar até 10 produtos.</li>
-            <li><strong>Plano PRO:</strong> Oferta especial de R$ 19,99 nos primeiros 3 meses, passando para R$ 29,99/mês após esse período.</li>
-            <li><strong>Renovação Automática via Pix:</strong> Garantimos controle total do criador sobre suas cobranças mensais.</li>
-          </ul>
-        </div>
+  <h4 className="font-bold text-white mb-2 uppercase text-xs tracking-wider">💎 1. Ciclo de Assinatura e Valores</h4>
+  <p className="text-zinc-400 text-xs mb-2">Trabalhamos com planos transparentes e sem surpresas:</p>
+  <ul className="list-disc pl-5 space-y-1 text-zinc-400 text-xs">
+    <li><strong>Plano Grátis:</strong> Grátis para sempre, permitindo publicar e manter até 10 produtos ativos na vitrine.</li>
+    <li><strong>Plano PRO:</strong> R$ 19,90 nos primeiros 3 meses, passando para R$ 29,90/mês após esse período, com produtos e recursos ilimitados.</li>
+    <li><strong>Renovação Automática:</strong> Garantimos controle total do criador sobre suas cobranças e cancelamentos a qualquer momento.</li>
+  </ul>
+</div>
 
         <div className="p-4 bg-emerald-950/25 rounded-lg border border-emerald-900/40">
           <h4 className="font-bold text-emerald-400 mb-2 uppercase text-xs tracking-wider">🛡️ 2. Garantia Incondicional de 7 Dias</h4>
@@ -205,8 +205,66 @@ const CONTENT_MAP = {
         </div>
       </div>
     )
-  }
+  },
+
+  quem_somos: {
+    title: "Quem Somos",
+    body: (
+      <div className="space-y-6 text-zinc-300 text-sm leading-relaxed">
+        <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5">
+          <h4 className="font-bold text-white mb-2 uppercase text-xs tracking-wider flex items-center gap-2">
+            <span className="text-blue-500">⚡</span> Nossa Essência
+          </h4>
+          <p className="text-zinc-300 text-xs leading-relaxed">
+            Nascemos com o propósito claro de revolucionar o ecossistema de vendas digitais e vitrines de afiliados. Combinamos arquitetura de software de alta performance com rigor técnico e conformidade regulatória, entregando um ambiente onde criadores de conteúdo escalam seus negócios com total tranquilidade, previsibilidade e estabilidade operacional.
+          </p>
+        </div>
+
+        <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5">
+          <h4 className="font-bold text-white mb-2 uppercase text-xs tracking-wider flex items-center gap-2">
+            <span className="text-blue-500">🎯</span> Nossa Missão
+          </h4>
+          <p className="text-zinc-300 text-xs leading-relaxed">
+            Contribuir ativamente para a construção de uma sociedade e de um mercado digital mais seguros. Fornecemos infraestrutura tecnológica confiável, de alta disponibilidade e sustentável, em estrita observância à legislação brasileira e aos marcos regulatórios federais aplicáveis. Nosso compromisso é blindar o criador contra fraudes e vulnerabilidades, assegurando um ecossistema digital íntegro, eficiente e pautado nas melhores práticas globais de engenharia de software.
+          </p>
+        </div>
+
+        <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5">
+          <h4 className="font-bold text-white mb-2 uppercase text-xs tracking-wider flex items-center gap-2">
+            <span className="text-blue-500">💎</span> Nossos Valores
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div className="p-3 bg-zinc-950/50 border border-zinc-800 rounded-lg">
+              <h5 className="font-semibold text-white text-[11px] uppercase tracking-wider mb-1">Sustentabilidade Tecnológica</h5>
+              <p className="text-zinc-400 text-[11px] leading-relaxed">
+                Desenvolvimento de sistemas escaláveis e eficientes, focados na durabilidade da infraestrutura e no baixo impacto operacional.
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-950/50 border border-zinc-800 rounded-lg">
+              <h5 className="font-semibold text-[11px] uppercase tracking-wider mb-1 text-blue-400">Respeito à Comunidade</h5>
+              <p className="text-zinc-400 text-[11px] leading-relaxed">
+                Compromisso inegociável com a ética, transparência e proteção de dados, promovendo um ambiente digital saudável e seguro para todos.
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-950/50 border border-zinc-800 rounded-lg">
+              <h5 className="font-semibold text-[11px] uppercase tracking-wider mb-1 text-blue-400">Conformidade e Rigor Legal</h5>
+              <p className="text-zinc-400 text-[11px] leading-relaxed">
+                Alinhamento absoluto com as leis do país, blindando a plataforma contra abusos, fraudes e práticas comerciais nocivas.
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-950/50 border border-zinc-800 rounded-lg">
+              <h5 className="font-semibold text-[11px] uppercase tracking-wider mb-1 text-blue-400">Inovação Orientada a Dados</h5>
+              <p className="text-zinc-400 text-[11px] leading-relaxed">
+                Evolução contínua baseada em engenharia de ponta, garantindo velocidade, segurança e usabilidade impecável.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  },
 };
+
 
 export default function TermsModal({ isOpen, onClose, type }: LegalModalProps) {
   if (!isOpen) return null;
