@@ -118,8 +118,12 @@ export default function VitrinePublicaPage({ params }: { params: Promise<{ usern
         if (userDocData && userIdDoc) {
           setCriador(userDocData);
           setUserId(userIdDoc); 
+          
+          // AJUSTE AQUI: Filtra diretamente no banco para trazer apenas produtos aprovados
           const produtosRef = collection(db, "users", userIdDoc, "produtos");
-          const produtosSnapshot = await getDocs(produtosRef);
+         // Testando com letra minúscula
+const qProdutos = query(produtosRef, where("status", "==", "aprovado"));
+          const produtosSnapshot = await getDocs(qProdutos);
           const listaProdutos = produtosSnapshot.docs.map(docProd => ({
             id: docProd.id,
             ...docProd.data()

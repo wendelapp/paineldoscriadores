@@ -35,7 +35,8 @@ export default function PricingCard() {
       
       if (data.init_point) {
         // Redireciona para o Checkout Pro do Mercado Pago
-        window.location.href = data.init_point;
+        // Como deve ficar (abre em nova aba)
+window.open(data.init_point, '_blank');
       } else {
         alert("Erro ao gerar link de pagamento.");
       }

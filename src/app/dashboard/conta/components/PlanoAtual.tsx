@@ -31,7 +31,8 @@ export default function PlanoAtual({ isPro, cancelouRenovacao = false }: PlanoAt
       const data = await response.json();
       
       if (data.init_point) {
-        window.location.href = data.init_point;
+        // Como deve ficar (abre em nova aba)
+window.open(data.init_point, '_blank');
       } else {
         alert("Erro ao gerar link de pagamento.");
         setProcessando(false);
