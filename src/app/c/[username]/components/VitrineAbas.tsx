@@ -70,12 +70,13 @@ export default function VitrineAbas({
         </button>
       </div>
 
-      {/* MODAL DE ESCOLHA DE CATEGORIAS */}
+      {/* MODAL DE ESCOLHA DE CATEGORIAS CENTRALIZADO E BLINDADO */}
+     {/* MODAL DE ESCOLHA DE CATEGORIAS FIXO NA TELA INTEIRA */}
       {modalCategoriasAberto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col p-5 space-y-4">
+        <div className="fixed top-0 left-0 w-screen h-screen z-99999 flex items-center justify-center p-4 bg-zinc-950/55 backdrop-blur-md">
+          <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 max-h-[85vh]">
             
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3 shrink-0">
               <h3 className="text-sm font-black text-white">Escolha uma Categoria</h3>
               <button 
                 onClick={() => setModalCategoriasAberto(false)} 
@@ -85,7 +86,7 @@ export default function VitrineAbas({
               </button>
             </div>
 
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2 overflow-y-auto max-h-[50vh] pr-1">
               <button
                 onClick={() => {
                   setCategoriaSelecionada(null);
@@ -122,7 +123,7 @@ export default function VitrineAbas({
 
             <button
               onClick={() => setModalCategoriasAberto(false)}
-              className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 font-bold text-xs rounded-xl transition-colors cursor-pointer shrink-0"
             >
               Fechar
             </button>

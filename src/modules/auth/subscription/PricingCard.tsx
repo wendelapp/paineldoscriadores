@@ -49,14 +49,14 @@ window.open(data.init_point, '_blank');
   return (
     <>
       {/* Container com pt-16 no mobile para garantir que o título nunca fique cortado no topo */}
-      <div className="w-full max-w-4xl mx-auto p-4 pt-16 md:pt-8 animate-in fade-in duration-300">
-        {/* --- BOTÃO VOLTAR --- */}
-        <div className="flex justify-end mb-4 md:mb-0 md:-mt-4 relative z-10">
+      <div className="w-full max-w-4xl mx-auto p-4 pt-64 md:pt-12 animate-in fade-in duration-300">
+        {/* --- BOTÃO VOLTAR AJUSTADO --- */}
+        <div className="flex justify-end mb-6 relative z-20">
           <button 
             onClick={() => router.push("/dashboard")} 
-            className="text-zinc-400 hover:text-white text-xs md:text-sm flex items-center gap-2 cursor-pointer transition-colors bg-zinc-900/80 px-4 py-1.5 rounded-full border border-zinc-800 hover:bg-zinc-800"
+            className="text-zinc-300 hover:text-white text-xs md:text-sm flex items-center gap-2 cursor-pointer transition-colors bg-zinc-900 px-5 py-2 rounded-xl border border-zinc-700 shadow-md hover:bg-zinc-800 font-bold"
           >
-            ✕ Voltar
+            ✕ Voltar ao Painel
           </button>
         </div>
         

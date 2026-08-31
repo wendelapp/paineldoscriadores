@@ -182,7 +182,7 @@ export default function VitrinePublicaPage({ params }: { params: Promise<{ usern
   const categoriasPresentes = Array.from(new Set(produtos.map(p => p.categoria || "📌 Outros")));
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white flex flex-col items-center py-10 px-4 relative selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#09090be6] text-white flex flex-col items-center py-10 px-4 relative isolate">
       
       {/* PIXELS */}
       {produtos.map((p) => (

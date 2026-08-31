@@ -10,6 +10,7 @@ interface Produto {
   urlVideo?: string;
   visualizacoes?: number;
   dataPublicacao?: any;
+  textoBotao?: string; // 👈 Adicionado aqui para o TypeScript reconhecer
 }
 
 interface ProdutoCardProps {
@@ -46,7 +47,7 @@ export default function ProdutoCard({ produto, onVisualizar, onClique }: Produto
             <div 
               onClick={(e) => {
                 e.stopPropagation();
-                onVisualizar(produto); // Abre o player de vídeo
+                onVisualizar(produto);
               }}
               className="absolute top-2 left-2 bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-lg cursor-pointer transition-colors"
             >
@@ -86,10 +87,10 @@ export default function ProdutoCard({ produto, onVisualizar, onClique }: Produto
         </div>
       </div>
 
-      {/* RODAPÉ DO PC */}
-      <div className="mt-auto hidden md:block">
-        <div className="px-3.5 pb-2">
-          <div className="w-full h-px bg-zinc-800/60 mb-1.5" />
+      {/* ÁREA DE ESTATÍSTICAS */}
+      <div className="mt-auto">
+        <div className="px-3.5 pb-2 pt-2 md:pt-0">
+          <div className="w-full h-px bg-zinc-800/60 mb-2 md:mb-1.5" />
           <div className="flex items-center justify-between text-[9px] text-zinc-500 font-medium">
             <div className="flex items-center gap-1 bg-zinc-800/40 px-1.5 py-0.5 rounded">
               <span>{produto.visualizacoes || 0} views</span>
@@ -100,29 +101,33 @@ export default function ProdutoCard({ produto, onVisualizar, onClique }: Produto
           </div>
         </div>
 
-        <a 
-          href={produto.urlAfiliado} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          onClick={() => onClique(produto)}
-          className="flex items-center justify-center gap-1 w-full py-2.5 px-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-colors shadow-lg cursor-pointer rounded-b-2xl rounded-t-none"
-        >
-          <span>🔥 Garanta o seu com Desconto</span> 
-          <span className="text-xs">↗</span>
-        </a>
-      </div>
+        {/* BOTÃO DO PC DINÂMICO */}
+        <div className="hidden md:block">
+          <a 
+            href={produto.urlAfiliado} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            onClick={() => onClique(produto)}
+            className="flex items-center justify-center gap-1 w-full py-2.5 px-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-colors shadow-lg cursor-pointer rounded-b-2xl rounded-t-none"
+          >
+            <span className="truncate">{produto.textoBotao || "🔥 Garanta o seu com Desconto"}</span> 
+            <span className="text-xs shrink-0">↗</span>
+          </a>
+        </div>
 
-      {/* RODAPÉ DO MOBILE */}
-      <div className="md:hidden border-t border-zinc-800/80 p-2 bg-zinc-950/40">
-        <a 
-          href={produto.urlAfiliado} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          onClick={() => onClique(produto)}
-          className="flex items-center justify-center gap-1 w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-lg shadow cursor-pointer"
-        >
-          <span>Comprar com Desconto</span> <span>↗</span>
-        </a>
+        {/* BOTÃO DO MOBILE DINÂMICO */}
+        <div className="md:hidden p-2 bg-zinc-950/40 border-t border-zinc-800/80">
+          <a 
+            href={produto.urlAfiliado} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            onClick={() => onClique(produto)}
+            className="flex items-center justify-center gap-1 w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-lg shadow cursor-pointer"
+          >
+            <span className="truncate">{produto.textoBotao || "Comprar com Desconto"}</span> 
+            <span className="shrink-0">↗</span>
+          </a>
+        </div>
       </div>
 
     </div>

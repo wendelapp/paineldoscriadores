@@ -157,6 +157,7 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
         <Link 
           href={userUid ? `/c/${userUid}` : "#"} 
           target="_blank" 
+          onClick={onCloseMobile}
           className="flex items-center gap-3 p-2 rounded-lg border bg-blue-600/5 border-blue-900/30 hover:bg-blue-600/10 group cursor-pointer"
         >
           <div className="w-7 h-7 rounded-md bg-blue-600/20 flex items-center justify-center text-blue-400 group-hover:text-blue-300">🌐</div>
@@ -166,13 +167,13 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
         </Link>
 
         {/* Perfil */}
-        <Link href="/dashboard/perfil" className={`flex items-center gap-3 p-2 rounded-lg border ${isActive('/dashboard/perfil') ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900/50 border-zinc-800/50'}`}>
+        <Link href="/dashboard/perfil" onClick={onCloseMobile} className={`flex items-center gap-3 p-2 rounded-lg border ${isActive('/dashboard/perfil') ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900/50 border-zinc-800/50'}`}>
           <div className="w-7 h-7 rounded-md bg-zinc-800 flex items-center justify-center text-purple-400">👤</div>
           <p className="text-xs font-bold text-white">Meu Perfil</p>
         </Link>
 
         {/* Conta */}
-        <Link href="/dashboard/conta" className={`flex items-center gap-3 p-2 rounded-lg border ${isActive('/dashboard/conta') ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900/50 border-zinc-800/50'}`}>
+        <Link href="/dashboard/conta" onClick={onCloseMobile} className={`flex items-center gap-3 p-2 rounded-lg border ${isActive('/dashboard/conta') ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900/50 border-zinc-800/50'}`}>
           <div className="w-7 h-7 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-300">⚙️</div>
           <p className="text-xs font-bold text-white">Gerenciar Conta</p>
         </Link>
