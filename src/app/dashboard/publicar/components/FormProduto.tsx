@@ -25,6 +25,8 @@ export default function FormProduto() {
   const [precoDe, setPrecoDe] = useState("97,00");
   const [precoPor, setPrecoPor] = useState("29,00");
   const [textoBotao, setTextoBotao] = useState("🔥 Garanta o seu com Desconto");
+
+  const [categoria, setCategoria] = useState("📌 Outros"); // Estado da categoria fixa
   
   const [statusLink, setStatusLink] = useState({ valido: false, mensagem: "" });
   const [salvando, setSalvando] = useState(false);
@@ -51,6 +53,8 @@ export default function FormProduto() {
   const [erroLink, setErroLink] = useState("");
   const [erroImagem, setErroImagem] = useState("");
   const [erroVideo, setErroVideo] = useState("");
+
+  const [descricao, setDescricao] = useState("");
 
   useEffect(() => {
     const verificarFilaAnalise = async () => {
@@ -175,6 +179,8 @@ export default function FormProduto() {
         precoDe,
         precoPor,
         textoBotao,
+        categoria, // 👈 ADICIONADO AQUI
+        descricao, // 👈 Adicione esta linha aqui
         pixelMeta: isPro ? pixelMeta : "",
         pixelGoogle: isPro ? pixelGoogle : "",
         dataPublicacao: serverTimestamp(),
@@ -367,6 +373,44 @@ export default function FormProduto() {
                 <input type="text" value={textoBotao} onChange={(e) => setTextoBotao(e.target.value)} placeholder="Ex: 🔥 Garanta com Desconto" className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600" disabled={limiteAtingido} />
               </div>
             </div>
+
+            {/* 🏷️ CAMPO DE CATEGORIA FIXA */}
+            <div>
+              <label className="block text-[11px] font-medium text-zinc-300 mb-1">Categoria do Produto</label>
+              <select 
+                value={categoria} 
+                onChange={(e) => setCategoria(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="💻 Tecnologia e Eletrônicos">💻 Tecnologia e Eletrônicos</option>
+                <option value="🎮 Games e Consoles">🎮 Games e Consoles</option>
+                <option value="🎓 Cursos e Infoprodutos">🎓 Cursos e Infoprodutos</option>
+                <option value="💊 Saúde e Suplementos">💊 Saúde e Suplementos</option>
+                <option value="💄 Beleza e Cosméticos">💄 Beleza e Cosméticos</option>
+                <option value="👕 Moda e Acessórios">👕 Moda e Acessórios</option>
+                <option value="🏠 Casa e Decoração">🏠 Casa e Decoração</option>
+                <option value="⚽ Esporte e Lazer">⚽ Esporte e Lazer</option>
+                <option value="📚 Livros e E-books">📚 Livros e E-books</option>
+                <option value="🧸 Infantil e Brinquedos">🧸 Infantil e Brinquedos</option>
+                <option value="🐶 Mundo Pet">🐶 Mundo Pet</option>
+                <option value="🛠️ Ferramentas e Jardim">🛠️ Ferramentas e Jardim</option>
+                <option value="🚗 Automotivo">🚗 Automotivo</option>
+                
+                <option value="📌 Outros">📌 Outros</option>
+              </select>
+            </div>
+
+            {/* 📝 CAMPO DE DESCRIÇÃO DETALHADA */}
+<div>
+  <label className="block text-[11px] font-medium text-zinc-300 mb-1">Descrição Completa / Detalhes (Opcional)</label>
+  <textarea 
+    value={descricao} 
+    onChange={(e) => setDescricao(e.target.value)} 
+    placeholder="Descreva os benefícios, o que o cliente recebe, diferenciais..." 
+    className="w-full p-3 text-xs bg-zinc-900 border border-zinc-700/80 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-25 resize-y" 
+    disabled={limiteAtingido}
+  />
+</div>
 
             <ProTrackingFields 
               isPro={isPro} 

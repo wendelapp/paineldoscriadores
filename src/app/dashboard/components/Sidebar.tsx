@@ -128,6 +128,25 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
           >
             <span>📦</span> Meus Produtos
           </Link>
+
+          {/* NOVOS MENUS AQUI */}
+          <Link 
+            href="/dashboard/categorias" 
+            onClick={onCloseMobile}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/dashboard/categorias') ? 'bg-blue-600/10 text-blue-500 border-l-2 border-blue-500' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'}`}
+          >
+            <span>🏷️</span> Categorias
+          </Link>
+
+          <Link 
+            href="/dashboard/avaliacoes" 
+            onClick={onCloseMobile}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/dashboard/avaliacoes') ? 'bg-yellow-500/10 text-yellow-500 border-l-2 border-yellow-500' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'}`}
+          >
+            <span>⭐</span> Avaliações
+          </Link>
+          {/* FIM DOS NOVOS MENUS */}
+
         </nav>
       </div>
 
